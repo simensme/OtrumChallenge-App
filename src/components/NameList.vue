@@ -1,4 +1,28 @@
 <script setup>
+import { ref } from 'vue';
+
+// Mock-up DB for names before I create backend
+const people = ref([
+    { name: 'George Bush', age: 25 },
+    { name: 'Max Derby', age: 36 },
+    { name: 'Barrack Obama', age: 50 },
+    { name: 'Winston Churchill', age: 95 },
+    { name: 'James Cage', age: 39 },
+]);
+
+const newPerson = ref({
+    name: '',
+    age: '',
+});
+
+const addPerson = () => {
+    if (newPerson.value.name && newPerson.value.age) {
+        people.value.push({ ...newPerson.value });
+        newPerson.value.name = '';
+        newPerson.value.age = '';
+    }
+};
+
 
 </script>
 
@@ -9,36 +33,20 @@
         </div>
         <table>
             <tbody>
-                <tr>
-                    <td>George Bush</td>
-                    <td>25</td>
+                <tr v-for="(person, index) in people" :key="index">
+                    <td>{{ person.name }}</td>
+                    <td>{{ person.age }}</td>
                     <td>X</td>
                 </tr>
                 <tr>
-                    <td>Max Derby</td>
-                    <td>36</td>
-                    <td>X</td>
-                </tr>
-                <tr>
-                    <td>Barrack Obama</td>
-                    <td>50</td>
-                    <td>X</td>
-                </tr>
-                <tr>
-                    <td>Winston Churchill</td>
-                    <td>95</td>
-                    <td>X</td>
-                </tr>
-                <tr>
-                    <td>James Cage</td>
-                    <td>39</td>
-                    <td>X</td>
+                    <td><input class="input-field" v-model="newPerson.name" placeholder="Name" /></td>
+                    <td><input class="input-field" v-model="newPerson.age" placeholder="Age" /></td>
                 </tr>
             </tbody>
         </table>
         <div class="button-container">
             <div class="add-container">
-                <button id="add">+ Add</button>
+                <button @click="addPerson">+ Add</button>
             </div>
             <div class="reload-save-container">
                 <button id="reload">Reload</button>
@@ -105,17 +113,29 @@ td {
 }
 
 td:first-child {
-    width: 90%;
+    width: 87%;
 }
 
 td:nth-child(2) {
-    width: 6%;
+    width: 9%;
 }
 
 td:nth-child(3) {
     width: 4%;
 }
 
+/* Input-field */
+.input-field {
+    width: 100%;
+    margin: 0;
+    box-sizing: border-box;
+    outline: none;
+    border: none; 
+    padding: 0; 
+    background-color: transparent; 
+    font-family: 'Roboto', sans-serif;
+    font-size: inherit; 
+}
 
 /* Buttons */
 .button-container {
@@ -137,7 +157,7 @@ td:nth-child(3) {
     display: flex;
     gap: 10px;
     justify-content: flex-end;
-    margin-top: 50px;
+    margin-top: 55px;
     margin-right: 5px;
 }
 
@@ -164,5 +184,4 @@ button:active {
     right: -2px;
 
 }
-
 </style>
