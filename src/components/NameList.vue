@@ -6,7 +6,6 @@
     <div class="header">
         <h1>Navneliste</h1>
     </div>
-
     <div>
         <table>
             <thead class="item-list">
@@ -35,17 +34,14 @@
             </tbody>
         </table>
     </div>
-
     <div class="add-container">
         <button id="save">Add</button>
     </div>
-
     <div class="reload-save-container">
         <button id="reload">Reload</button>
         <button id="save">Save</button>
     </div>
 </template>
-
 <style>
 body {
     display: flex;

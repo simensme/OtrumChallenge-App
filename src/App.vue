@@ -1,11 +1,10 @@
 <script setup>
-import { RouterView } from 'vue-router';
 import NameList from './components/NameList.vue';
 </script>
 
 <template>
+  <h1>helloaefawef3f</h1>
   <NameList/>
-  <RouterView />
 </template>
 
 <style>
