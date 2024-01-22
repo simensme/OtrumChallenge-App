@@ -1,15 +1,7 @@
 <script setup>
-import { ref } from 'vue';
+import { ref, onMounted } from 'vue';
 
-// Mock-up DB for names before I create backend
-const people = ref([
-    { name: 'George Bush', age: 25 },
-    { name: 'Max Derby', age: 36 },
-    { name: 'Barrack Obama', age: 50 },
-    { name: 'Winston Churchill', age: 95 },
-    { name: 'James Cage', age: 39 },
-]);
-
+const people = ref([]);
 const newPerson = ref({
     name: '',
     age: '',
@@ -22,6 +14,20 @@ const addPerson = () => {
         newPerson.value.age = '';
     }
 };
+
+const fetchPeople = async () => {
+    try {
+        const response = await fetch('http://localhost:8080/name-list');
+        const data = await response.json();
+        people.value = data;
+    } catch (err) {
+        console.error('Error fetching data:', err);
+    }
+};
+
+onMounted(() => {
+    fetchPeople();
+});
 
 
 </script>
