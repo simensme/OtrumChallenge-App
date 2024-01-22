@@ -7,11 +7,23 @@ const newPerson = ref({
     age: '',
 });
 
-const addPerson = () => {
+const addPerson = async () => {
     if (newPerson.value.name && newPerson.value.age) {
-        people.value.push({ ...newPerson.value });
-        newPerson.value.name = '';
-        newPerson.value.age = '';
+        const response = await fetch('http://localhost:8080/name-list', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(newPerson.value),
+        });
+
+        if (response.ok) {
+            fetchPeople();
+            newPerson.value.name = '';
+            newPerson.value.age = '';
+        } else {
+            console.error('Error adding person:', response.statusText);
+        }
     }
 };
 
@@ -55,7 +67,7 @@ onMounted(() => {
                 <button @click="addPerson">+ Add</button>
             </div>
             <div class="reload-save-container">
-                <button id="reload">Reload</button>
+                <button @click="fetchPeople">Reload</button>
                 <button id="save">Save</button>
             </div>
         </div>
@@ -136,11 +148,11 @@ td:nth-child(3) {
     margin: 0;
     box-sizing: border-box;
     outline: none;
-    border: none; 
-    padding: 0; 
-    background-color: transparent; 
+    border: none;
+    padding: 0;
+    background-color: transparent;
     font-family: 'Roboto', sans-serif;
-    font-size: inherit; 
+    font-size: inherit;
 }
 
 /* Buttons */
