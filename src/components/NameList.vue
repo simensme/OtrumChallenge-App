@@ -13,15 +13,19 @@ const isValidAge = age => {
     }
 };
 
+const isNameValid = name => {
+    return /[a-zA-Z]/.test(name.trim());
+};
+
 const isDuplicateName = name => {
     return people.value.some(person => person.name === name);
 };
 
 const addPerson = async () => {
     const trimmedName = newPerson.value.name.trim();
-    if (trimmedName && isValidAge(newPerson.value.age)) {
+    if (isNameValid(trimmedName) && isValidAge(newPerson.value.age)) {
         if (!isDuplicateName(trimmedName)) {
-            const response = await fetch('http://localhost:8080/name-list', {
+            const res = await fetch('http://localhost:8080/name-list', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -31,42 +35,62 @@ const addPerson = async () => {
                     age: parseInt(newPerson.value.age, 10),
                 }),
             });
-            if (response.ok) {
+            if (res.ok) {
                 fetchPeople();
                 newPerson.value.name = '';
                 newPerson.value.age = '';
             } else {
-                console.error('Error adding person:', response.statusText);
+                console.error('An error occured while adding the person: ', res.statusText);
             }
         } else {
-            alert('Name already exsists, please enter a different name');
+            alert('Name already exists, please enter a different name');
         }
     } else {
-        alert('Please enter a valid age');
+        alert('Please enter a valid name and age');
     }
 };
 
-const deletePerson = async (index) => {
-    const deletedPerson = people.value[index];
-    await new Promise((resolve) => setTimeout(resolve, 0));
-    if (deletedPerson) {
-        const response = await fetch(`http://localhost:8080/name-list/${index}`, {
-            method: 'DELETE',
+const updatePerson = async i => {
+    const updatedPerson = people.value[i];
+    if (isNameValid(updatedPerson.name) && isValidAge(updatedPerson.age)) {
+        const res = await fetch(`http://localhost:8080/name-list/${i}`, {
+            method: 'PUT',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+                name: updatedPerson.name,
+                age: parseInt(updatedPerson.age, 10),
+            }),
         });
-        if (response.ok) {
-            people.value.splice(index, 1);
+        if (res.ok) {
+            fetchPeople();
         } else {
-            console.error('Error deleting person:', response.statusText);
+            console.error('Error updating person:', res.statusText);
         }
     } else {
-        console.error('Invalid person data or missing ID.');
+        alert('Please enter a valid age and name');
+    }
+};
+
+const deletePerson = async i => {
+    const deletedPerson = people.value[i];
+    if (deletedPerson) {
+        const res = await fetch(`http://localhost:8080/name-list/${i}`, {
+            method: 'DELETE',
+        });
+        if (res.ok) {
+            people.value.splice(i, 1);
+        } else {
+            console.error('Error deleting person through the server:', res.statusText);
+        }
     }
 };
 
 const fetchPeople = async () => {
     try {
-        const response = await fetch('http://localhost:8080/name-list');
-        const data = await response.json();
+        const res = await fetch('http://localhost:8080/name-list');
+        const data = await res.json();
         people.value = data.map((person) => ({ ...person }));
     } catch (err) {
         console.error('Error fetching data:', err);
@@ -97,6 +121,7 @@ onMounted(() => {
                     <td>
                         <input class="input-field" v-model="person.age" />
                     </td>
+                    <td class="update-button" @click="updatePerson(index)">Update</td>
                     <td class="delete-button" @click="deletePerson(index)">X</td>
                 </tr>
                 <tr>
@@ -109,9 +134,8 @@ onMounted(() => {
             <div class="add-container">
                 <button @click="addPerson">+ Add</button>
             </div>
-            <div class="reload-save-container">
+            <div class="reload-container">
                 <button @click="reload">Reload</button>
-                <button>Save</button>
             </div>
         </div>
     </div>
@@ -135,7 +159,7 @@ body {
 }
 
 .main {
-    width: 38%;
+    width: 45%;
     margin: 0 auto;
 }
 
@@ -174,14 +198,18 @@ td {
 }
 
 td:first-child {
-    width: 87%;
+    width: 75%;
 }
 
 td:nth-child(2) {
-    width: 9%;
+    width: 7%;
 }
 
 td:nth-child(3) {
+    width: 14%;
+}
+
+td:nth-child(4) {
     width: 4%;
 }
 
@@ -206,7 +234,7 @@ td:nth-child(3) {
 }
 
 .add-container,
-.reload-save-container {
+.reload-container {
     text-align: center;
 }
 
@@ -214,7 +242,7 @@ td:nth-child(3) {
     margin-left: 5px;
 }
 
-.reload-save-container {
+.reload-container {
     display: flex;
     gap: 10px;
     justify-content: flex-end;
@@ -246,7 +274,7 @@ button:active {
 
 }
 
-/* Buttons for deleting a particular person */
+/* Delete and update buttons */
 .delete-button {
     padding: 10px;
     margin: 5px;
@@ -258,11 +286,18 @@ button:active {
     position: relative;
 }
 
-.delete-button:hover {
+.update-button {
+    cursor: pointer;
+    position: relative;
+}
+
+.delete-button:hover,
+.update-button:hover {
     background: rgb(199, 199, 199);
 }
 
-.delete-button:active {
+.delete-button:active,
+.update-button:active {
     bottom: -2px;
     right: -2px;
 }
