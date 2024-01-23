@@ -7,34 +7,48 @@ const newPerson = ref({
     age: '',
 });
 
+const isValidAge = age => {
+    if (age <= 130) {
+        return !isNaN(age) && parseInt(age, 10) >= 0;
+    }
+};
+
+const isDuplicateName = name => {
+    return people.value.some(person => person.name === name);
+};
+
 const addPerson = async () => {
-    if (newPerson.value.name && newPerson.value.age) {
-        const response = await fetch('http://localhost:8080/name-list', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({
-                name: newPerson.value.name,
-                age: parseInt(newPerson.value.age, 10),
-            }),
-        });
-        if (response.ok) {
-            fetchPeople();
-            newPerson.value.name = '';
-            newPerson.value.age = '';
+    const trimmedName = newPerson.value.name.trim();
+    if (trimmedName && isValidAge(newPerson.value.age)) {
+        if (!isDuplicateName(trimmedName)) {
+            const response = await fetch('http://localhost:8080/name-list', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    name: trimmedName,
+                    age: parseInt(newPerson.value.age, 10),
+                }),
+            });
+            if (response.ok) {
+                fetchPeople();
+                newPerson.value.name = '';
+                newPerson.value.age = '';
+            } else {
+                console.error('Error adding person:', response.statusText);
+            }
         } else {
-            console.error('Error adding person:', response.statusText);
+            alert('Name already exsists, please enter a different name');
         }
     } else {
-        console.error('Invalid person data.');
+        alert('Please enter a valid age');
     }
 };
 
 const deletePerson = async (index) => {
     const deletedPerson = people.value[index];
     await new Promise((resolve) => setTimeout(resolve, 0));
-
     if (deletedPerson) {
         const response = await fetch(`http://localhost:8080/name-list/${index}`, {
             method: 'DELETE',
@@ -53,7 +67,7 @@ const fetchPeople = async () => {
     try {
         const response = await fetch('http://localhost:8080/name-list');
         const data = await response.json();
-        people.value = data.map((person) => ({ ...person}));
+        people.value = data.map((person) => ({ ...person }));
     } catch (err) {
         console.error('Error fetching data:', err);
     }
@@ -70,7 +84,7 @@ onMounted(() => {
 
 </script>
 <template>
-      <div class="main" >
+    <div class="main">
         <div class="header">
             <h1>NameList</h1>
         </div>
@@ -78,16 +92,16 @@ onMounted(() => {
             <tbody>
                 <tr v-for="(person, index) in people" :key="index">
                     <td>
-                        <input class="input-field" v-model="person.name"/>
+                        <input class="input-field" v-model="person.name" />
                     </td>
                     <td>
-                        <input class="input-field" v-model="person.age"/>
+                        <input class="input-field" v-model="person.age" />
                     </td>
                     <td class="delete-button" @click="deletePerson(index)">X</td>
                 </tr>
                 <tr>
-                    <td><input class="input-field" v-model="newPerson.name" placeholder="Name"/></td>
-                    <td><input class="input-field" v-model="newPerson.age" placeholder="Age"/></td>
+                    <td><input class="input-field" v-model="newPerson.name" placeholder="Name" /></td>
+                    <td><input class="input-field" v-model="newPerson.age" placeholder="Age" /></td>
                 </tr>
             </tbody>
         </table>
