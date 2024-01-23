@@ -19,7 +19,6 @@ const addPerson = async () => {
                 age: parseInt(newPerson.value.age, 10),
             }),
         });
-
         if (response.ok) {
             fetchPeople();
             newPerson.value.name = '';
@@ -54,10 +53,15 @@ const fetchPeople = async () => {
     try {
         const response = await fetch('http://localhost:8080/name-list');
         const data = await response.json();
-        people.value = data;
+        people.value = data.map((person) => ({ ...person}));
     } catch (err) {
         console.error('Error fetching data:', err);
     }
+};
+
+const reload = () => {
+    fetchPeople();
+    window.location.reload(true);
 };
 
 onMounted(() => {
@@ -66,20 +70,24 @@ onMounted(() => {
 
 </script>
 <template>
-    <div class="main">
+      <div class="main" >
         <div class="header">
             <h1>NameList</h1>
         </div>
         <table>
             <tbody>
                 <tr v-for="(person, index) in people" :key="index">
-                    <td>{{ person.name }}</td>
-                    <td>{{ person.age }}</td>
+                    <td>
+                        <input class="input-field" v-model="person.name"/>
+                    </td>
+                    <td>
+                        <input class="input-field" v-model="person.age"/>
+                    </td>
                     <td class="delete-button" @click="deletePerson(index)">X</td>
                 </tr>
                 <tr>
-                    <td><input class="input-field" v-model="newPerson.name" placeholder="Name" /></td>
-                    <td><input class="input-field" v-model="newPerson.age" placeholder="Age" /></td>
+                    <td><input class="input-field" v-model="newPerson.name" placeholder="Name"/></td>
+                    <td><input class="input-field" v-model="newPerson.age" placeholder="Age"/></td>
                 </tr>
             </tbody>
         </table>
@@ -88,8 +96,8 @@ onMounted(() => {
                 <button @click="addPerson">+ Add</button>
             </div>
             <div class="reload-save-container">
-                <button @click="fetchPeople">Reload</button>
-                <button id="save">Save</button>
+                <button @click="reload">Reload</button>
+                <button>Save</button>
             </div>
         </div>
     </div>
