@@ -14,7 +14,10 @@ const addPerson = async () => {
             headers: {
                 'Content-Type': 'application/json',
             },
-            body: JSON.stringify(newPerson.value),
+            body: JSON.stringify({
+                name: newPerson.value.name,
+                age: parseInt(newPerson.value.age, 10),
+            }),
         });
 
         if (response.ok) {
@@ -24,6 +27,26 @@ const addPerson = async () => {
         } else {
             console.error('Error adding person:', response.statusText);
         }
+    } else {
+        console.error('Invalid person data.');
+    }
+};
+
+const deletePerson = async (index) => {
+    const deletedPerson = people.value[index];
+    await new Promise((resolve) => setTimeout(resolve, 0));
+
+    if (deletedPerson) {
+        const response = await fetch(`http://localhost:8080/name-list/${index}`, {
+            method: 'DELETE',
+        });
+        if (response.ok) {
+            people.value.splice(index, 1);
+        } else {
+            console.error('Error deleting person:', response.statusText);
+        }
+    } else {
+        console.error('Invalid person data or missing ID.');
     }
 };
 
@@ -41,9 +64,7 @@ onMounted(() => {
     fetchPeople();
 });
 
-
 </script>
-
 <template>
     <div class="main">
         <div class="header">
@@ -54,7 +75,7 @@ onMounted(() => {
                 <tr v-for="(person, index) in people" :key="index">
                     <td>{{ person.name }}</td>
                     <td>{{ person.age }}</td>
-                    <td>X</td>
+                    <td class="delete-button" @click="deletePerson(index)">X</td>
                 </tr>
                 <tr>
                     <td><input class="input-field" v-model="newPerson.name" placeholder="Name" /></td>
@@ -201,5 +222,26 @@ button:active {
     bottom: -2px;
     right: -2px;
 
+}
+
+/* Buttons for deleting a particular person */
+.delete-button {
+    padding: 10px;
+    margin: 5px;
+    cursor: pointer;
+    font-family: 'Roboto', sans-serif;
+    font-size: 18px;
+    padding: 10px 20px;
+    text-decoration: none;
+    position: relative;
+}
+
+.delete-button:hover {
+    background: rgb(199, 199, 199);
+}
+
+.delete-button:active {
+    bottom: -2px;
+    right: -2px;
 }
 </style>
