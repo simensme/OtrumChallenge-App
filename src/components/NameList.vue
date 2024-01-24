@@ -7,6 +7,7 @@ const newPerson = ref({
     age: '',
 });
 
+// Validation
 const isValidAge = age => {
     if (age <= 130) {
         return !isNaN(age) && parseInt(age, 10) >= 0;
@@ -14,11 +15,22 @@ const isValidAge = age => {
 };
 
 const isNameValid = name => {
-    return /[a-zA-Z]/.test(name.trim());
+    return /[a-åA-Å]/.test(name);
 };
 
 const isDuplicateName = name => {
     return people.value.some(person => person.name === name);
+};
+
+// CRUD
+const fetchPeople = async () => {
+    try {
+        const res = await fetch('http://localhost:8080/name-list');
+        const data = await res.json();
+        people.value = data.map(person => ({ ...person }));
+    } catch (err) {
+        console.error('Error fetching data:', err);
+    }
 };
 
 const addPerson = async () => {
@@ -80,20 +92,10 @@ const deletePerson = async i => {
             method: 'DELETE',
         });
         if (res.ok) {
-            people.value.splice(i, 1);
+            fetchPeople();
         } else {
             console.error('Error deleting person through the server:', res.statusText);
         }
-    }
-};
-
-const fetchPeople = async () => {
-    try {
-        const res = await fetch('http://localhost:8080/name-list');
-        const data = await res.json();
-        people.value = data.map((person) => ({ ...person }));
-    } catch (err) {
-        console.error('Error fetching data:', err);
     }
 };
 
@@ -233,16 +235,13 @@ td:nth-child(4) {
     margin-top: 10px;
 }
 
-.add-container,
-.reload-container {
-    text-align: center;
-}
-
 .add-container {
+    text-align: center;
     margin-left: 5px;
 }
 
 .reload-container {
+    text-align: center;
     display: flex;
     gap: 10px;
     justify-content: flex-end;

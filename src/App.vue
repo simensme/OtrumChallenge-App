@@ -7,5 +7,4 @@ import NameList from './components/NameList.vue';
 </template>
 
 <style>
-
 </style>
